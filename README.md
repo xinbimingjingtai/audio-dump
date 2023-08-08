@@ -30,7 +30,8 @@ cloud/qq music dump
 	Specify the log output filename
 ```
 
-Note: if param(the <xxx> part) contains whitespace character, use quotes surround with it
+Note: If param(the <xxx> part) contains whitespace character, use quotes surround with it. You can run `mvn package`,
+then the `<executable>.jar` will be generated (filename end with `shaded.jar`) in directory `target`.
 
 
 ## Supported formats
