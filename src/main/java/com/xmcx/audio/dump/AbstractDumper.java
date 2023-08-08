@@ -2,6 +2,8 @@ package com.xmcx.audio.dump;
 
 import com.xmcx.audio.dump.cloudmusic.CloudMusicKey;
 import com.xmcx.audio.dump.cloudmusic.CloudMusicMetadata;
+import com.xmcx.audio.dump.wrapper.FileWrapper;
+import com.xmcx.audio.dump.wrapper.Wrapper;
 import com.xmcx.audio.utils.CodecUtil;
 import com.xmcx.audio.utils.IoUtil;
 import com.xmcx.audio.utils.JsonUtil;
@@ -22,10 +24,10 @@ import org.jaudiotagger.tag.reference.Languages;
 import org.jaudiotagger.tag.reference.PictureTypes;
 import org.jaudiotagger.tag.vorbiscomment.VorbisCommentFieldKey;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,21 +35,20 @@ import java.util.Set;
  */
 public abstract class AbstractDumper {
 
-    public abstract boolean isSupported(File file);
+    /**
+     * The extensions(lower case) supported by this dumper
+     */
+    public abstract List<String> supportedExtensions();
 
-    public final void dump(File file) {
-        String filename = file.getName();
-        if (!isSupported(file)) {
-            LoggerUtil.warn("File '%s' is unsupported", filename);
-        }
-        LoggerUtil.info(">>> Dumping '%s' <<<", filename);
-        try (Wrapper wrapper = new Wrapper(file, filename)) {
+    public final void dump(FileWrapper fileWrapper) {
+        LoggerUtil.info(">>> Dumping '%s' <<<", fileWrapper.filename);
+        try (Wrapper wrapper = new Wrapper(fileWrapper)) {
             doDump(wrapper);
             fetchMetadata(wrapper);
             fixTag(wrapper);
-            LoggerUtil.info(">>> Dumped '%s' <<<", filename);
+            LoggerUtil.info(">>> Dumped '%s' <<<", fileWrapper.filename);
         } catch (Exception e) {
-            LoggerUtil.warn("Dump '%s' fail: '%s', please check that the file format is correct", filename, e.getMessage());
+            LoggerUtil.warn("Dump '%s' fail: '%s', please check that the file format is correct", fileWrapper.filename, e.getMessage());
         }
     }
 
@@ -134,7 +135,7 @@ public abstract class AbstractDumper {
             ((FlacTag) tag).setField(VorbisCommentFieldKey.DESCRIPTION.getFieldName(), remark);
         } else {
             // 不支持
-            LoggerUtil.warn("Unsupported '%s' format: %s", wrapper.filename, metadata.getFormat());
+            LoggerUtil.warn("Fix '%s' remark fail: unsupported format '%s'", wrapper.filename, metadata.getFormat());
         }
     }
 

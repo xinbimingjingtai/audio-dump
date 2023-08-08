@@ -1,13 +1,17 @@
 package com.xmcx.audio.dump.qqmusic;
 
 import com.xmcx.audio.dump.AbstractDumper;
-import com.xmcx.audio.dump.Wrapper;
+import com.xmcx.audio.dump.wrapper.Wrapper;
 import com.xmcx.audio.utils.FilenameUtil;
 import com.xmcx.audio.utils.IoUtil;
 import com.xmcx.audio.utils.LoggerUtil;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
 /**
@@ -17,15 +21,27 @@ import java.util.regex.Pattern;
  */
 public class QQMusicDumper extends AbstractDumper {
 
-    private static final Pattern MP3_PATTERN = Pattern.compile(".*\\.(qmc3|qmc0)", Pattern.CASE_INSENSITIVE);
-    private static final Pattern FLAC_PATTERN = Pattern.compile(".*\\.qmcflac", Pattern.CASE_INSENSITIVE);
+    private final List<String> mp3Extensions = Arrays.asList("qmc0", "qmc3");
 
-    private static final Pattern FILENAME_PATTERN = Pattern.compile(" *\\[(mqms\\d*)]", Pattern.CASE_INSENSITIVE);
+    private final List<String> flacExtensions = Collections.singletonList("qmcflac");
+
+    private final List<String> supportedExtensions = new ArrayList<>();
+
+    {
+        supportedExtensions.addAll(mp3Extensions);
+        supportedExtensions.addAll(flacExtensions);
+    }
+
+    /**
+     * avoid duplicate create {@code Pattern}
+     */
+    private final Pattern basenamePattern = Pattern.compile(" *\\[(mqms\\d*)]", Pattern.CASE_INSENSITIVE);
+
+    private final UnaryOperator<String> basenameModifier = basename -> basenamePattern.matcher(basename).replaceAll("");
 
     @Override
-    public boolean isSupported(File file) {
-        String filename = file.getName();
-        return MP3_PATTERN.matcher(filename).matches() || FLAC_PATTERN.matcher(filename).matches();
+    public List<String> supportedExtensions() {
+        return supportedExtensions;
     }
 
     @Override
@@ -52,9 +68,9 @@ public class QQMusicDumper extends AbstractDumper {
     private File writeMusic(Wrapper wrapper, byte[] music) {
         LoggerUtil.info("Write '%s' music", wrapper.filename);
 
-        String extension = FLAC_PATTERN.matcher(wrapper.filename).matches() ? "flac" : "mp3";
-        File musicFile = new File(wrapper.file.getParent(),
-                FilenameUtil.modifyExtension(wrapper.filename, extension, filename -> FILENAME_PATTERN.matcher(filename).replaceAll("")));
+        String extension = flacExtensions.contains(wrapper.extension) ? "flac" : "mp3";
+
+        File musicFile = new File(wrapper.file.getParent(), FilenameUtil.filename(wrapper.basename, extension, basenameModifier));
         IoUtil.writeBytes(musicFile, music);
         return musicFile;
     }

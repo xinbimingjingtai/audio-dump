@@ -1,19 +1,10 @@
-package com.xmcx.audio.dump;
+package com.xmcx.audio.dump.wrapper;
 
 import com.xmcx.audio.dump.cloudmusic.CloudMusicMetadata;
 
 import java.io.*;
 
-public class Wrapper implements Closeable {
-    /**
-     * original file
-     */
-    public final File file;
-
-    /**
-     * original filename
-     */
-    public final String filename;
+public class Wrapper extends FileWrapper implements Closeable {
 
     /**
      * original stream
@@ -30,9 +21,8 @@ public class Wrapper implements Closeable {
      */
     public CloudMusicMetadata metadata;
 
-    public Wrapper(File file, String filename) throws FileNotFoundException {
-        this.file = file;
-        this.filename = filename;
+    public Wrapper(FileWrapper fileWrapper) throws FileNotFoundException {
+        super(fileWrapper);
         this.fis = new FileInputStream(file);
     }
 

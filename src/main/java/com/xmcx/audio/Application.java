@@ -1,6 +1,7 @@
 package com.xmcx.audio;
 
-import com.xmcx.audio.dump.DumperChain;
+import com.xmcx.audio.dump.DumperStrategy;
+import com.xmcx.audio.dump.wrapper.FileWrapper;
 import com.xmcx.audio.utils.LoggerUtil;
 
 import java.io.File;
@@ -27,35 +28,37 @@ public class Application {
             return;
         }
 
-        DumperChain dumperChain = new DumperChain();
+        DumperStrategy dumperStrategy = new DumperStrategy();
 
-        /* single ncm file */
+        /* single file */
         File file = new File(args[0]);
         if (!file.isDirectory()) {
-            if (dumperChain.isSupported(file)) {
-                dumperChain.dump(file);
+            FileWrapper fileWrapper = new FileWrapper(file);
+            if (dumperStrategy.isSupported(fileWrapper)) {
+                dumperStrategy.dump(fileWrapper);
             } else {
-                LoggerUtil.warn("File '%s' is unsupported", file.getName());
+                LoggerUtil.warn("File '%s' is unsupported", fileWrapper.filename);
             }
             return;
         }
 
-        /* multiple ncm files */
-        try (Stream<Path> stream = Files.walk(file.toPath()).filter(path -> !Files.isDirectory(path) && dumperChain.isSupported(path.toFile()))) {
-            int counter;
-            if (DUMP_MODE.isToggled()) {
-                ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() << 1);
-                Function<Path, Callable<Void>> mapper = path -> () -> dumperChain.dump(path.toFile());
+        /* multiple files */
+        try (Stream<Path> paths = Files.walk(file.toPath()).filter(path -> !Files.isDirectory(path))) {
+            Stream<FileWrapper> stream = paths.map(path -> new FileWrapper(path.toFile())).filter(dumperStrategy::isSupported);
+            int counter, procNum;
+            if (DUMP_MODE.isToggled() && (procNum = Runtime.getRuntime().availableProcessors()) > 1) {
+                ExecutorService executorService = Executors.newFixedThreadPool(procNum << 1);
+                Function<FileWrapper, Callable<Void>> mapper = fileWrapper -> () -> dumperStrategy.dump(fileWrapper);
                 List<Callable<Void>> callables = stream.map(mapper).collect(Collectors.toList());
                 counter = callables.size();
                 executorService.invokeAll(callables);
                 executorService.shutdown();
             } else {
-                List<Path> paths = stream.collect(Collectors.toList());
-                for (Path path : paths) {
-                    dumperChain.dump(path.toFile());
+                List<FileWrapper> list = stream.collect(Collectors.toList());
+                for (FileWrapper fileWrapper : list) {
+                    dumperStrategy.dump(fileWrapper);
                 }
-                counter = paths.size();
+                counter = list.size();
             }
             // 转储目录完成，已转储10个文件
             LoggerUtil.info("Dump directory '%s' complete, %s files have been dumped", args[0], counter);

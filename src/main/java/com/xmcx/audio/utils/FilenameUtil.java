@@ -7,16 +7,15 @@ import java.util.function.UnaryOperator;
  */
 public class FilenameUtil {
 
-    public static String modifyExtension(String filename, String extension) {
-        return modifyExtension(filename, extension, null);
+    public static String filename(String basename, String extension) {
+        return filename(basename, extension, null);
     }
 
-    public static String modifyExtension(String filename, String extension, UnaryOperator<String> filenameModifier) {
-        if (filenameModifier != null) {
-            filename = filenameModifier.apply(filename);
+    public static String filename(String basename, String extension, UnaryOperator<String> basenameModifier) {
+        if (basenameModifier != null) {
+            basename = basenameModifier.apply(basename);
         }
-        int index = filename.lastIndexOf('.');
-        return index < 0 ? (filename + "." + extension) : (filename.substring(0, index + 1) + extension);
+        return basename + '.' + extension;
     }
 
 }

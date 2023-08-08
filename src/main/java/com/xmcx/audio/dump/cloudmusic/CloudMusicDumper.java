@@ -1,16 +1,18 @@
 package com.xmcx.audio.dump.cloudmusic;
 
 import com.xmcx.audio.dump.AbstractDumper;
-import com.xmcx.audio.dump.Wrapper;
+import com.xmcx.audio.dump.wrapper.Wrapper;
 import com.xmcx.audio.utils.*;
 
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 
 /**
  * Netease dump
@@ -19,11 +21,16 @@ import java.util.regex.Pattern;
  */
 public class CloudMusicDumper extends AbstractDumper {
 
-    private static final Pattern PATTERN = Pattern.compile(".*\\.ncm", Pattern.CASE_INSENSITIVE);
+    private final List<String> ncmExtensions = Collections.singletonList("ncm");
+    private final List<String> supportedExtensions = new ArrayList<>();
+
+    {
+        supportedExtensions.addAll(ncmExtensions);
+    }
 
     @Override
-    public boolean isSupported(File file) {
-        return PATTERN.matcher(file.getName()).matches();
+    public List<String> supportedExtensions() {
+        return supportedExtensions;
     }
 
     /**
@@ -164,7 +171,7 @@ public class CloudMusicDumper extends AbstractDumper {
     private File writeMusic(Wrapper wrapper, CloudMusicMetadata metadata, byte[] music) {
         LoggerUtil.info("Write '%s' music", wrapper.filename);
 
-        File musicFile = new File(wrapper.file.getParent(), FilenameUtil.modifyExtension(wrapper.filename, metadata.getFormat().toLowerCase()));
+        File musicFile = new File(wrapper.file.getParent(), FilenameUtil.filename(wrapper.basename, metadata.getFormat().toLowerCase()));
         IoUtil.writeBytes(musicFile, music);
         return musicFile;
     }
