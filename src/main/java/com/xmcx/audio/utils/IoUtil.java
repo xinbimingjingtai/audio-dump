@@ -53,7 +53,6 @@ public class IoUtil {
      */
     public static void skipN(FileInputStream fis, long n) {
         try {
-            //noinspection ResultOfMethodCallIgnored
             fis.skip(n);
         } catch (IOException e) {
             // should not happen
@@ -66,7 +65,6 @@ public class IoUtil {
      */
     public static void writeBytes(File dest, byte[] data) {
         if (dest.exists()) {
-            //noinspection ResultOfMethodCallIgnored
             dest.delete();
         }
 
