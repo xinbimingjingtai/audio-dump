@@ -1,7 +1,7 @@
 package com.xmcx.audio.dump.cloudmusic;
 
 /**
- * Ncm keys
+ * Keys
  */
 public class CloudMusicKey {
 

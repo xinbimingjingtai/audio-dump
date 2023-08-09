@@ -25,7 +25,7 @@ public class IoUtil {
             public void run() {
                 try {
                     // disconnect is unnecessary
-                    HttpURLConnection conn = (HttpURLConnection) new URL("https://cn.bing.com").openConnection();
+                    HttpURLConnection conn = (HttpURLConnection) new URL("https://music.163.com").openConnection();
                     conn.setRequestMethod("HEAD");
                     connectable = conn.getResponseCode() == HttpURLConnection.HTTP_OK;
                 } catch (IOException e) {
@@ -53,6 +53,7 @@ public class IoUtil {
      */
     public static void skipN(FileInputStream fis, long n) {
         try {
+            //noinspection ResultOfMethodCallIgnored
             fis.skip(n);
         } catch (IOException e) {
             // should not happen
@@ -65,6 +66,7 @@ public class IoUtil {
      */
     public static void writeBytes(File dest, byte[] data) {
         if (dest.exists()) {
+            //noinspection ResultOfMethodCallIgnored
             dest.delete();
         }
 

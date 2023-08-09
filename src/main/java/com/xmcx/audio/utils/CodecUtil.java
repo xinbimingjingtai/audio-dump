@@ -5,7 +5,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
 /**
- * Code util
+ * Codec util
  */
 public class CodecUtil {
 

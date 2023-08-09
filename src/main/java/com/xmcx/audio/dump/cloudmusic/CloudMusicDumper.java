@@ -15,9 +15,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 /**
- * Netease dump
- * <p>
- * ncm
+ * cloud music dumper
  */
 public class CloudMusicDumper extends AbstractDumper {
 

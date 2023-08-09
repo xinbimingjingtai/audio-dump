@@ -7,7 +7,7 @@ import com.xmcx.audio.dump.wrapper.FileWrapper;
 import java.util.*;
 
 /**
- * Dumper chain
+ * Dumper strategy
  */
 public class DumperStrategy {
 
