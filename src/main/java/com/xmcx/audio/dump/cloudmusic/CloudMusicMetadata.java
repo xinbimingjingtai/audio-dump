@@ -49,11 +49,11 @@ import java.util.Optional;
 public class CloudMusicMetadata {
 
     private Long musicId;
-    @ToString.Include(rank = 1)
+    @ToString.Include(rank = 2)
     private String musicName;
     private List<List<Object>> artist;
     private Long albumId;
-    @ToString.Include(rank = 3)
+    @ToString.Include(rank = 1)
     private String album;
     private String albumPicDocId;
     private String albumPic;
@@ -76,7 +76,7 @@ public class CloudMusicMetadata {
     private String remark;
     // other fields
 
-    @ToString.Include(rank = 2)
+    @ToString.Include(rank = 3)
     public String[] artistsName() {
         return Optional.ofNullable(artist).orElse(Collections.emptyList())
                 .stream().map(e -> (String) e.get(0)).toArray(String[]::new);
