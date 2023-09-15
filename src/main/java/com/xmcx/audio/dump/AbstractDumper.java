@@ -41,6 +41,10 @@ public abstract class AbstractDumper {
     public abstract List<String> supportedExtensions();
 
     public final void dump(FileWrapper fileWrapper) {
+        if (!supportedExtensions().contains(fileWrapper.extension)) {
+            LoggerUtil.info("Dumper '%s' is unsupported the file '%s'", this.getClass().getSimpleName(), fileWrapper.filename);
+            return;
+        }
         LoggerUtil.info(">>> Dumping '%s' <<<", fileWrapper.filename);
         try (Wrapper wrapper = new Wrapper(fileWrapper)) {
             doDump(wrapper);
@@ -95,7 +99,7 @@ public abstract class AbstractDumper {
      * <p>
      * Can not delete field with iterator, otherwise occur {@code ConcurrentModificationException}
      */
-    private void deleteFields(Tag tag) {
+    protected void deleteFields(Tag tag) {
         Set<String> fieldSet = new HashSet<>();
         Iterator<TagField> fields = tag.getFields();
         while (fields.hasNext()) {
@@ -109,7 +113,7 @@ public abstract class AbstractDumper {
      * Fix fields
      */
     @SneakyThrows
-    private void fixFields(Wrapper wrapper, Tag tag, CloudMusicMetadata metadata) {
+    protected void fixFields(Wrapper wrapper, Tag tag, CloudMusicMetadata metadata) {
         tag.setField(FieldKey.ALBUM, metadata.getAlbum());
         for (String artistName : metadata.artistsName()) {
             tag.addField(FieldKey.ARTIST, artistName);
@@ -123,7 +127,7 @@ public abstract class AbstractDumper {
         if (remark == null || remark.isEmpty()) {
             remark = JsonUtil.writeString(metadata);
             remark = "music:" + remark;
-            remark = new String(CodecUtil.base64Encrypt(CodecUtil.aesEcbEncrypt(remark.getBytes(StandardCharsets.UTF_8), CloudMusicKey.META_KEY)));
+            remark = new String(CodecUtil.base64Encrypt(CodecUtil.aesEcbEncrypt(remark.getBytes(StandardCharsets.UTF_8), CloudMusicKey.META_KEY)), StandardCharsets.UTF_8);
             remark = "163 key(don't modify):" + remark;
         }
         if (tag instanceof AbstractID3v2Tag) {
@@ -143,7 +147,7 @@ public abstract class AbstractDumper {
      * Delete fields in tag
      */
     @SneakyThrows
-    private void fixArtwork(Wrapper wrapper, Tag tag, CloudMusicMetadata metadata) {
+    protected void fixArtwork(Wrapper wrapper, Tag tag, CloudMusicMetadata metadata) {
         byte[] albumImage = metadata.getAlbumImage();
         if (albumImage.length == 0) {
             try {

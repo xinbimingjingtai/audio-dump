@@ -2,6 +2,7 @@ package com.xmcx.audio.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -20,6 +21,16 @@ public class JsonUtil {
     public static <T> T readObject(byte[] data, Class<T> cls) {
         try {
             return MAPPER.readValue(data, cls);
+        } catch (IOException e) {
+            // should not happen, otherwise modify the mapper configuration
+            LoggerUtil.warn("Can not parse '%s'", new String(data, StandardCharsets.UTF_8));
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T readObject(byte[] data, TypeReference<T> typeRef) {
+        try {
+            return MAPPER.readValue(data, typeRef);
         } catch (IOException e) {
             // should not happen, otherwise modify the mapper configuration
             LoggerUtil.warn("Can not parse '%s'", new String(data, StandardCharsets.UTF_8));
