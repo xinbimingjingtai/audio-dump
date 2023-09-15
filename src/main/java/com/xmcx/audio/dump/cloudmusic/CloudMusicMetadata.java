@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +44,7 @@ import java.util.Optional;
  *   }
  * </pre>
  */
+@Accessors(chain = true)
 @Getter
 @Setter
 @ToString(onlyExplicitlyIncluded = true)
@@ -57,8 +59,6 @@ public class CloudMusicMetadata {
     private String album;
     private String albumPicDocId;
     private String albumPic;
-    @JsonIgnore
-    private byte[] albumImage;
     private Long bitrate;
     private String mp3DocId;
     private Long duration;
@@ -74,6 +74,8 @@ public class CloudMusicMetadata {
      */
     @JsonIgnore
     private String remark;
+    @JsonIgnore
+    private byte[] albumImage;
     // other fields
 
     @ToString.Include(rank = 3)
